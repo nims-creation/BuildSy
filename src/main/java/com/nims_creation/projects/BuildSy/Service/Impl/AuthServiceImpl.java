@@ -3,20 +3,51 @@ package com.nims_creation.projects.BuildSy.Service.Impl;
 import com.nims_creation.projects.BuildSy.Dto.Auth.AuthResponse;
 import com.nims_creation.projects.BuildSy.Dto.Auth.LoginRequest;
 import com.nims_creation.projects.BuildSy.Dto.Auth.SignupRequest;
+import com.nims_creation.projects.BuildSy.Entity.User;
+import com.nims_creation.projects.BuildSy.Error.BadRequestException;
 import com.nims_creation.projects.BuildSy.Service.AuthService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AuthServiceImpl implements AuthService {
+
+    UserRepository userRepository;
+    UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
+    AuthUtil authUtil;
+    AuthenticationManager authenticationManager;
 
     @Override
     public AuthResponse signup(SignupRequest request) {
-        return null;
+        userRepository.findByUsername(request.username()).ifPresent(user -> {
+            throw new BadRequestException("User already exists with username: "+request.username());
+        });
+
+        User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user = userRepository.save(user);
+
+        String token = authUtil.generateAccessToken(user);
+        return new AuthResponse(token, userMapper.toUserProfileResponse(user));
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        return null;
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
+        );
+
+        User user = (User) authentication.getPrincipal();
+
+        String token = authUtil.generateAccessToken(user);
+        return new AuthResponse(token, userMapper.toUserProfileResponse(user));
     }
+
 }
 

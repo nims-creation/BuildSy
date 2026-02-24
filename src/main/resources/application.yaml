@@ -1,3 +1,7 @@
 spring:
   application:
     name: BuildSy
+    description: This project is inspired by lovable.
+
+  datasource:
+    url: jdbc:postgresql://localhost:
