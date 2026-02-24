@@ -1,37 +1,33 @@
 package com.nims_creation.projects.BuildSy.Service.Impl;
 
-import com.nims_creation.projects.BuildSy.Dto.Project.ProjectRequest;
-import com.nims_creation.projects.BuildSy.Dto.Project.ProjectResponse;
-import com.nims_creation.projects.BuildSy.Dto.Project.ProjectSummaryResponse;
-import com.nims_creation.projects.BuildSy.Service.ProjectService;
+import com.nims_creation.projects.BuildSy.Dto.Member.InviteMemberRequest;
+import com.nims_creation.projects.BuildSy.Dto.Member.MemberResponse;
+import com.nims_creation.projects.BuildSy.Dto.Member.UpdateMemberRoleRequest;
+import com.nims_creation.projects.BuildSy.Service.ProjectMemberService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class ProjectMemberServiceImpl implements ProjectService {
+public class ProjectMemberServiceImpl implements ProjectMemberService{
+
     @Override
-    public List<ProjectSummaryResponse> getUserProjects(Long userId) {
+    public List<MemberResponse> getProjectMembers(Long projectId, Long userId) {
         return List.of();
     }
 
     @Override
-    public ProjectResponse getUserProjectById(Long id, Long userId) {
+    public MemberResponse inviteMember(Long projectId, InviteMemberRequest request, Long userId) {
         return null;
     }
 
     @Override
-    public ProjectResponse createProject(ProjectRequest request, Long userId) {
+    public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request, Long userId) {
         return null;
     }
 
     @Override
-    public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
+    public MemberResponse deleteProjectMember(Long projectId, Long memberId, Long userId) {
         return null;
-    }
-
-    @Override
-    public void softDelete(Long id, Long userId) {
-
     }
 }

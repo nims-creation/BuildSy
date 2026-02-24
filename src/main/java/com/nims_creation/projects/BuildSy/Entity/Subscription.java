@@ -1,5 +1,6 @@
 package com.nims_creation.projects.BuildSy.Entity;
 
+import com.nims_creation.projects.BuildSy.Entity.Enum.SubscriptionStatus;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
