@@ -1,11 +1,14 @@
 package com.nims_creation.projects.BuildSy.Error;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class BadRequestException extends RuntimeException{
-    String message;
+@Getter
+public class ResourceNotFoundException extends RuntimeException {
+    String resourceName;
+    String resourceId;
 }
