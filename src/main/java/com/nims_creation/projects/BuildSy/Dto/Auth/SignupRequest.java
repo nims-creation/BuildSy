@@ -9,4 +9,5 @@ public record SignupRequest(
         @Size(min = 2, max = 30) String name,
         @Size(min = 6,max = 20) String password
 ) {
+    
 }
