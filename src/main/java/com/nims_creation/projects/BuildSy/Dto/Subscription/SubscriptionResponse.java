@@ -1,4 +1,4 @@
-package com.nims_creation.projects.BuildSy.Dto.Auth.Subscription;
+package com.nims_creation.projects.BuildSy.Dto.Subscription;
 
 import java.time.Instant;
 

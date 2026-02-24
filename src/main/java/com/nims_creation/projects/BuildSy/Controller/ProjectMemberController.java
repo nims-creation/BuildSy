@@ -1,8 +1,8 @@
 package com.nims_creation.projects.BuildSy.Controller;
 
-import com.nims_creation.projects.BuildSy.Dto.Auth.Member.InviteMemberRequest;
-import com.nims_creation.projects.BuildSy.Dto.Auth.Member.MemberResponse;
-import com.nims_creation.projects.BuildSy.Entity.ProjectMember;
+import com.nims_creation.projects.BuildSy.Dto.Member.InviteMemberRequest;
+import com.nims_creation.projects.BuildSy.Dto.Member.MemberResponse;
+import com.nims_creation.projects.BuildSy.Dto.Member.UpdateMemberRoleRequest;
 import com.nims_creation.projects.BuildSy.Service.ProjectMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class ProjectMemberController {
     private final ProjectMemberService projectMemberService;
 
     @GetMapping
-    public ResponseEntity<List<ProjectMember>> getProjectMembers(@PathVariable Long projectId) {
+    public ResponseEntity<List<MemberResponse>> getProjectMembers(@PathVariable Long projectId) {
         Long userId = 1L;
         return ResponseEntity.ok(projectMemberService.getProjectMembers(projectId, userId));
     }
@@ -39,14 +39,14 @@ public class ProjectMemberController {
     public ResponseEntity<MemberResponse> updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId,
-            @RequestBody InviteMemberRequest request
+            @RequestBody UpdateMemberRoleRequest request
     ) {
         Long userId = 1L;
         return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId, memberId, request, userId));
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> updateMemberRole(
+    public ResponseEntity<MemberResponse> deleteMember(
             @PathVariable Long projectId,
             @PathVariable Long memberId
     ) {

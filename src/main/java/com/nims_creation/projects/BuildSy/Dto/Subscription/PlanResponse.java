@@ -1,4 +1,4 @@
-package com.nims_creation.projects.BuildSy.Dto.Auth.Subscription;
+package com.nims_creation.projects.BuildSy.Dto.Subscription;
 
 public record PlanResponse(
         Long id,

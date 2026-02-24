@@ -1,4 +1,4 @@
-package com.nims_creation.projects.BuildSy.Dto.Auth.Member;
+package com.nims_creation.projects.BuildSy.Dto.Member;
 
 import com.nims_creation.projects.BuildSy.Entity.Enum.ProjectRole;
 

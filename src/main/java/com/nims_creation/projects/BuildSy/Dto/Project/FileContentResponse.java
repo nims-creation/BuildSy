@@ -1,4 +1,4 @@
-package com.nims_creation.projects.BuildSy.Dto.Auth.Project;
+package com.nims_creation.projects.BuildSy.Dto.Project;
 
 public record FileContentResponse(
         String path,

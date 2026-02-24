@@ -1,7 +1,7 @@
 package com.nims_creation.projects.BuildSy.Service;
 
-import com.nims_creation.projects.BuildSy.Dto.Auth.Project.FileContentResponse;
-import com.nims_creation.projects.BuildSy.Dto.Auth.Project.FileNode;
+import com.nims_creation.projects.BuildSy.Dto.Project.FileContentResponse;
+import com.nims_creation.projects.BuildSy.Dto.Project.FileNode;
 
 import java.util.List;
 

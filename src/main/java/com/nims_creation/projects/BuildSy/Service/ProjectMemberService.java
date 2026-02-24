@@ -1,18 +1,17 @@
 package com.nims_creation.projects.BuildSy.Service;
 
-import com.nims_creation.projects.BuildSy.Dto.Auth.Member.InviteMemberRequest;
-import com.nims_creation.projects.BuildSy.Dto.Auth.Member.MemberResponse;
-import com.nims_creation.projects.BuildSy.Entity.ProjectMember;
+import com.nims_creation.projects.BuildSy.Dto.Member.InviteMemberRequest;
+import com.nims_creation.projects.BuildSy.Dto.Member.MemberResponse;
+import com.nims_creation.projects.BuildSy.Dto.Member.UpdateMemberRoleRequest;
 
 import java.util.List;
 
 public interface ProjectMemberService {
-    List<ProjectMember> getProjectMembers(Long projectId, Long userId);
+    List<MemberResponse> getProjectMembers(Long projectId, Long userId);
 
     MemberResponse inviteMember(Long projectId, InviteMemberRequest request, Long userId);
-
-    MemberResponse updateMemberRole(Long projectId, Long memberId, InviteMemberRequest request, Long userId);
-
+    MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request, Long userId);
     MemberResponse deleteProjectMember(Long projectId, Long memberId, Long userId);
+
 }
 

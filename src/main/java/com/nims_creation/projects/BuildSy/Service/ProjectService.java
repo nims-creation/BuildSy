@@ -1,8 +1,8 @@
 package com.nims_creation.projects.BuildSy.Service;
 
-import com.nims_creation.projects.BuildSy.Dto.Auth.Project.ProjectRequest;
-import com.nims_creation.projects.BuildSy.Dto.Auth.Project.ProjectResponse;
-import com.nims_creation.projects.BuildSy.Dto.Auth.Project.ProjectSummaryResponse;
+import com.nims_creation.projects.BuildSy.Dto.Project.ProjectRequest;
+import com.nims_creation.projects.BuildSy.Dto.Project.ProjectResponse;
+import com.nims_creation.projects.BuildSy.Dto.Project.ProjectSummaryResponse;
 
 import java.util.List;
 

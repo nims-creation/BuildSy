@@ -1,7 +1,7 @@
 package com.nims_creation.projects.BuildSy.Service;
 
-import com.nims_creation.projects.BuildSy.Dto.Auth.Subscription.PlanLimitsResponse;
-import com.nims_creation.projects.BuildSy.Dto.Auth.Subscription.UsageTodayResponse;
+import com.nims_creation.projects.BuildSy.Dto.Subscription.PlanLimitsResponse;
+import com.nims_creation.projects.BuildSy.Dto.Subscription.UsageTodayResponse;
 
 public interface UsageService {
 

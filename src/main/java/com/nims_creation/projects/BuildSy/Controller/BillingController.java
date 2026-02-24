@@ -1,6 +1,6 @@
 package com.nims_creation.projects.BuildSy.Controller;
 
-import com.nims_creation.projects.BuildSy.Dto.Auth.Subscription.*;
+import com.nims_creation.projects.BuildSy.Dto.Subscription.*;
 import com.nims_creation.projects.BuildSy.Service.PlanService;
 import com.nims_creation.projects.BuildSy.Service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
