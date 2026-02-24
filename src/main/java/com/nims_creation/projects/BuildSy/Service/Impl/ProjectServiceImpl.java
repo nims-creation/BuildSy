@@ -5,9 +5,11 @@ import com.nims_creation.projects.BuildSy.Dto.Project.ProjectResponse;
 import com.nims_creation.projects.BuildSy.Dto.Project.ProjectSummaryResponse;
 import com.nims_creation.projects.BuildSy.Entity.Project;
 import com.nims_creation.projects.BuildSy.Entity.User;
+import com.nims_creation.projects.BuildSy.Mapper.ProjectMapper;
 import com.nims_creation.projects.BuildSy.Repository.ProjectRepository;
 import com.nims_creation.projects.BuildSy.Repository.UserRepository;
 import com.nims_creation.projects.BuildSy.Service.ProjectService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +17,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ProjectMapper projectMapper;
 
-    @Override
-    public List<ProjectSummaryResponse> getUserProjects(Long userId) {
-        return List.of();
-    }
+
 
     @Override
     public ProjectResponse getUserProjectById(Long id, Long userId) {
@@ -38,10 +39,17 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = Project.builder()
                 .name(request.name())
                 .owner(owner)
+                .isPublic(false)
                 .build();
 
         project = projectRepository.save(project);
-        return null;
+        return projectMapper.toProjectResponse(project);
+    }
+
+    @Override
+    public List<ProjectSummaryResponse> getUserProjects(Long userId) {
+        var projects = projectRepository.findAllAccessibleByUser(userId);
+        return projectMapper.toListOfProjectSummaryResponse(projects);
     }
 
     @Override
