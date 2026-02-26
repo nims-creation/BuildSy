@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Table(name = "users")
-public class User implements UserDetails {
+public class User{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -37,10 +38,7 @@ public class User implements UserDetails {
 
     Instant deletedAt; //soft delete
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
+
 }
 
 
