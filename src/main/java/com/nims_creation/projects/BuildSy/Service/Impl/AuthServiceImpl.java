@@ -7,6 +7,7 @@ import com.nims_creation.projects.BuildSy.Entity.User;
 import com.nims_creation.projects.BuildSy.Error.BadRequestException;
 import com.nims_creation.projects.BuildSy.Mapper.UserMapper;
 import com.nims_creation.projects.BuildSy.Repository.UserRepository;
+import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.AuthService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class AuthServiceImpl implements AuthService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    AuthUtil authUtil;
 
     @Override
     public AuthResponse signup(SignupRequest request) {
@@ -32,7 +34,9 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.password()));
         user = userRepository.save(user);
-        return new AuthResponse("dummy", userMapper.toUserProfileResponse(user));
+
+        String token = authUtil.generatedAccessToken(user);
+        return new AuthResponse(token, userMapper.toUserProfileResponse(user));
     }
 
     @Override
