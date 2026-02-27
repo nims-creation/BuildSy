@@ -31,9 +31,6 @@ public class Project {
     @Column(nullable = false)
     String name;
 
-    @ManyToOne
-    User owner;
-
     Boolean isPublic = false;
 
     @CreationTimestamp

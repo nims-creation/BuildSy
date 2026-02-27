@@ -3,10 +3,14 @@ package com.nims_creation.projects.BuildSy.Service.Impl;
 import com.nims_creation.projects.BuildSy.Dto.Project.ProjectRequest;
 import com.nims_creation.projects.BuildSy.Dto.Project.ProjectResponse;
 import com.nims_creation.projects.BuildSy.Dto.Project.ProjectSummaryResponse;
+import com.nims_creation.projects.BuildSy.Entity.Enum.ProjectRole;
 import com.nims_creation.projects.BuildSy.Entity.Project;
+import com.nims_creation.projects.BuildSy.Entity.ProjectMember;
+import com.nims_creation.projects.BuildSy.Entity.ProjectMemberId;
 import com.nims_creation.projects.BuildSy.Entity.User;
 import com.nims_creation.projects.BuildSy.Error.ResourceNotFoundException;
 import com.nims_creation.projects.BuildSy.Mapper.ProjectMapper;
+import com.nims_creation.projects.BuildSy.Repository.ProjectMemberRepository;
 import com.nims_creation.projects.BuildSy.Repository.ProjectRepository;
 import com.nims_creation.projects.BuildSy.Repository.UserRepository;
 import com.nims_creation.projects.BuildSy.Service.ProjectService;
@@ -24,6 +28,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ProjectMemberRepository projectMemberRepository;
     private final ProjectMapper projectMapper;
 
 
@@ -31,15 +36,29 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectResponse createProject(ProjectRequest request, Long userId) {
 
-        User owner = userRepository.findById(userId).orElseThrow();
+        User owner = userRepository.findById(userId).orElseThrow(
+                ()-> new ResourceNotFoundException("User",userId.toString())
+        );
 
         Project project = Project.builder()
                 .name(request.name())
-                .owner(owner)
                 .isPublic(false)
                 .build();
 
         project = projectRepository.save(project);
+
+        ProjectMemberId projectMemberId = new ProjectMemberId(project.getId(), owner.getId());
+        ProjectMember projectMember = ProjectMember.builder()
+                .id(projectMemberId)
+                .projectRole(ProjectRole.OWNER)
+                .user(owner)
+                .acceptedAt(Instant.now())
+                .invitedAt(Instant.now())
+                .project(project)
+                .build();
+
+        projectMemberRepository.save(projectMember);
+
         return projectMapper.toProjectResponse(project);
     }
 
