@@ -1,6 +1,7 @@
 package com.nims_creation.projects.BuildSy.Security;
 
 import com.nims_creation.projects.BuildSy.Entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 
 @Component
@@ -30,4 +32,15 @@ public class AuthUtil {
                 .compact();
     }
 
+    public JwtUserPrincipal verifyAccessToken(String token){
+        Claims claims = Jwts.parser()
+                .verifyWith(getSecretKey())
+                .build()
+                .parseEncryptedClaims(token)
+                .getPayload();
+        Long userId = Long.parseLong(claims.get("userid",String.class));
+        String username = claims.getSubject();
+
+        return new JwtUserPrincipal(userId, username, new ArrayList<>());
+    }
 }
