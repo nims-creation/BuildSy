@@ -107,8 +107,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
         }
 
         ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
-        if(projectMemberRepository.existsById(projectMemberId)){
-            throw new RuntimeException("Cannot invite once again");
+        if(!projectMemberRepository.existsById(projectMemberId)){
+            throw new RuntimeException("Member not found in project");
         }
 
         projectMemberRepository.deleteById(projectMemberId);

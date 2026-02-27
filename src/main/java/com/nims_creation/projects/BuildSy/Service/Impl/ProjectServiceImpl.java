@@ -5,6 +5,7 @@ import com.nims_creation.projects.BuildSy.Dto.Project.ProjectResponse;
 import com.nims_creation.projects.BuildSy.Dto.Project.ProjectSummaryResponse;
 import com.nims_creation.projects.BuildSy.Entity.Project;
 import com.nims_creation.projects.BuildSy.Entity.User;
+import com.nims_creation.projects.BuildSy.Error.ResourceNotFoundException;
 import com.nims_creation.projects.BuildSy.Mapper.ProjectMapper;
 import com.nims_creation.projects.BuildSy.Repository.ProjectRepository;
 import com.nims_creation.projects.BuildSy.Repository.UserRepository;
@@ -73,6 +74,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public Project getAccessibleProjectById(Long projectId, Long userId){
-        return projectRepository.findAccessibleProjectById(projectId, userId).orElseThrow();
+        return projectRepository.findAccessibleProjectById(projectId, userId)
+                .orElseThrow(()->new ResourceNotFoundException("Project", projectId));
     }
 }
