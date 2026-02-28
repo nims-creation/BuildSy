@@ -17,6 +17,7 @@ import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -72,6 +73,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
+    @PreAuthorize("@security.canViewProject(#projectId)")
     public ProjectResponse getUserProjectById(Long id) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(id, userId);
