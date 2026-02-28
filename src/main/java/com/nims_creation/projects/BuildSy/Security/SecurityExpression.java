@@ -1,6 +1,6 @@
 package com.nims_creation.projects.BuildSy.Security;
 
-import com.nims_creation.projects.BuildSy.Entity.Enum.ProjectRole;
+import com.nims_creation.projects.BuildSy.Entity.Enum.projectPermission;
 import com.nims_creation.projects.BuildSy.Repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ public class SecurityExpression {
         Long userId = authUtil.getCurrentUserId();
 
         return projectMemberRepository.findRoleByProjectIdAndUserId(projectId, userId)
-                .map(role-> role.equals(ProjectRole.OWNER) || role.equals(ProjectRole.EDITOR) || role.equals(ProjectRole.VIEWER))
+                .map(role-> role.getPermissions().contains(projectPermission.VIEW))
                 .orElse(false);
     }
 
@@ -26,7 +26,7 @@ public class SecurityExpression {
         Long userId = authUtil.getCurrentUserId();
 
         return projectMemberRepository.findRoleByProjectIdAndUserId(projectId, userId)
-                .map(role-> role.equals(ProjectRole.OWNER) || role.equals(ProjectRole.EDITOR))
+                .map(role-> role.getPermissions().contains(projectPermission.EDIT))
                 .orElse(false);
     }
 }
