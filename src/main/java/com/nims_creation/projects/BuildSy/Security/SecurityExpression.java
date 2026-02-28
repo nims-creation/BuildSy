@@ -1,6 +1,6 @@
 package com.nims_creation.projects.BuildSy.Security;
 
-import com.nims_creation.projects.BuildSy.Entity.Enum.projectPermission;
+import com.nims_creation.projects.BuildSy.Entity.Enum.ProjectPermission;
 import com.nims_creation.projects.BuildSy.Repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,20 +13,34 @@ public class SecurityExpression {
     private final AuthUtil authUtil;
 
 
-    public boolean canViewProject(Long projectId){
+    private boolean hasPermission(Long projectId, ProjectPermission projectPermission){
         Long userId = authUtil.getCurrentUserId();
-
         return projectMemberRepository.findRoleByProjectIdAndUserId(projectId, userId)
-                .map(role-> role.getPermissions().contains(projectPermission.VIEW))
+                .map(role-> role.getPermissions().contains(projectPermission))
                 .orElse(false);
+    }
+
+    public boolean canViewProject(Long projectId){
+
+        return hasPermission(projectId, ProjectPermission.VIEW);
     }
 
 
     public boolean canEditProject(Long projectId){
-        Long userId = authUtil.getCurrentUserId();
-
-        return projectMemberRepository.findRoleByProjectIdAndUserId(projectId, userId)
-                .map(role-> role.getPermissions().contains(projectPermission.EDIT))
-                .orElse(false);
+        return hasPermission(projectId, ProjectPermission.EDIT);
     }
+
+    public boolean canDeleteProject(Long projectId){
+        return hasPermission(projectId, ProjectPermission.DELETE);
+    }
+
+    public boolean canViewMembers(Long projectId){
+        return hasPermission(projectId, ProjectPermission.VIEW_MEMBERS);
+    }
+
+    public boolean canManageMembers(Long projectId){
+        return hasPermission(projectId, ProjectPermission.MANAGE_MEMBERS);
+    }
+
+
 }

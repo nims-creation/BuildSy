@@ -15,6 +15,7 @@ import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.ProjectMemberService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,6 +34,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
 
 
     @Override
+    @PreAuthorize("@security.canViewMember(#projectId)")
     public List<MemberResponse> getProjectMembers(Long projectId) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
@@ -44,6 +46,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
     }
 
     @Override
+    @PreAuthorize("@security.canManageMember(#projectId)")
     public MemberResponse inviteMember(Long projectId, InviteMemberRequest request) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
@@ -74,6 +77,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
     }
 
     @Override
+    @PreAuthorize("@security.canManageMember(#projectId)")
     public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request) {
         Long userId = authUtil.getCurrentUserId();
         Project project = getAccessibleProjectById(projectId, userId);
@@ -87,6 +91,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService{
     }
 
     @Override
+    @PreAuthorize("@security.canManageMember(#projectId)")
     public void removeProjectMember(Long projectId, Long memberId ) {
         Long userId = authUtil.getCurrentUserId();
 
