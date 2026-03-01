@@ -11,12 +11,17 @@ import com.nims_creation.projects.BuildSy.Repository.UserRepository;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.PaymentProcessor;
 import com.stripe.exception.StripeException;
+import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StripePaymentProcessor implements PaymentProcessor {
@@ -42,7 +47,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setSubscriptionData(
                         new SessionCreateParams.SubscriptionData.Builder()
-                                .setBillingMode(SessionCreateParams.SubscriptionData.BillingMode.builder()
+                                .setBillingCycleAnchor(SessionCreateParams.SubscriptionData.BillingMode.builder()
                                         .setType(SessionCreateParams.SubscriptionData.BillingMode.Type.FLEXIBLE)
                                         .build())
                                 .build()
@@ -69,5 +74,10 @@ public class StripePaymentProcessor implements PaymentProcessor {
     @Override
     public PortalResponse openCustomerPortal(Long userId) {
         return null;
+    }
+
+    @Override
+    public void handleWebhookEvent(String type, StripeObject stripeObject, Map<String, String> metadata) {
+        log.info("type");
     }
 }
