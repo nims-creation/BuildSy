@@ -1,6 +1,7 @@
 package com.nims_creation.projects.BuildSy.Controller;
 
 import com.nims_creation.projects.BuildSy.Dto.Subscription.*;
+import com.nims_creation.projects.BuildSy.Service.PaymentProcessor;
 import com.nims_creation.projects.BuildSy.Service.PlanService;
 import com.nims_creation.projects.BuildSy.Service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class BillingController {
 
     private final PlanService planService;
     private final SubscriptionService subscriptionService;
+    private final PaymentProcessor paymentProcessor;
 
     @GetMapping("/api/plans")
     public ResponseEntity<List<PlanResponse>> getAllPlans() {
@@ -30,18 +32,17 @@ public class BillingController {
         return ResponseEntity.ok(subscriptionService.getCurrentSubscription(userId));
     }
 
-    @PostMapping("/api/stripe/checkout")
+    @PostMapping("/api/payments/checkout")
     public ResponseEntity<CheckoutResponse> createCheckoutResponse(
             @RequestBody CheckoutRequest request
     ) {
-        Long userId = 1L;
-        return ResponseEntity.ok(subscriptionService.createCheckoutSessionUrl(request, userId));
+        return ResponseEntity.ok(paymentProcessor.createCheckoutSessionUrl(request));
     }
 
-    @PostMapping("/api/stripe/portal")
+    @PostMapping("/api/payments/portal")
     public ResponseEntity<PortalResponse> openCustomerPortal() {
         Long userId = 1L;
-        return ResponseEntity.ok(subscriptionService.openCustomerPortal(userId));
+        return ResponseEntity.ok(paymentProcessor.openCustomerPortal(userId));
     }
 }
 
