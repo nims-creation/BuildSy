@@ -4,5 +4,6 @@ public enum PreviewStatus {
     CREATING,
     RUNNING,
     FAILED,
-    TERMINATED
+    TERMINATED,
+    UNDER_REVIEW
 }
