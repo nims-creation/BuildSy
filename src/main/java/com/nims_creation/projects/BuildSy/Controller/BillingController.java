@@ -40,7 +40,8 @@ public class BillingController {
 
     @GetMapping("/api/me/subscription")
     public ResponseEntity<SubscriptionResponse> getMySubscription() {
-        return ResponseEntity.ok(subscriptionService.getCurrentSubscription());
+        Long userId = 1L;
+        return ResponseEntity.ok(subscriptionService.getCurrentSubscription(userId));
     }
 
     @PostMapping("/api/payments/checkout")
@@ -52,7 +53,8 @@ public class BillingController {
 
     @PostMapping("/api/payments/portal")
     public ResponseEntity<PortalResponse> openCustomerPortal() {
-        return ResponseEntity.ok(paymentProcessor.openCustomerPortal());
+        Long userId = 1L;
+        return ResponseEntity.ok(paymentProcessor.openCustomerPortal(userId));
     }
 
     @PostMapping("/webhooks/payment")
