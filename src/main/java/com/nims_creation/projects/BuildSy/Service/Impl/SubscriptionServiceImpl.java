@@ -24,4 +24,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     }
 
+    @Override
+    public void cancelSubscription(String id) {
+
+    }
+
 }

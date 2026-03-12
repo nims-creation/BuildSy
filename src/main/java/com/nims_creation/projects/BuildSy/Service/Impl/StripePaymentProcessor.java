@@ -165,6 +165,15 @@ public class StripePaymentProcessor implements PaymentProcessor {
     }
 
 
+    private void handleCustomerSubscriptionDeleted(Subscription subscription) {
+        if (subscription == null) {
+            log.error("subscription object was null inside handleCustomerSubscriptionDeleted");
+            return;
+        }
+        subscriptionService.cancelSubscription(subscription.getId());
+    }
+
+
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
                 new ResourceNotFoundException("user", userId.toString()));
@@ -194,7 +203,6 @@ public class StripePaymentProcessor implements PaymentProcessor {
                 .map(Plan::getId)
                 .orElse(null);
     }
-
 
 }
 
