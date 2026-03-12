@@ -174,6 +174,29 @@ public class StripePaymentProcessor implements PaymentProcessor {
     }
 
 
+    private void handleInvoicePaid(Invoice invoice) {
+        String subId = extractSubscriptionId(invoice);
+        if(subId == null) return;
+
+        try {
+            Subscription subscription = Subscription.retrieve(subId); //sdk calling the Stripe server
+            var item = subscription.getItems().getData().get(0);
+
+            Instant periodStart = toInstant(item.getCurrentPeriodStart());
+            Instant periodEnd = toInstant(item.getCurrentPeriodEnd());
+
+            subscriptionService.renewSubscriptionPeriod(
+                    subId,
+                    periodStart,
+                    periodEnd
+            );
+
+        } catch (StripeException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
                 new ResourceNotFoundException("user", userId.toString()));
@@ -202,6 +225,16 @@ public class StripePaymentProcessor implements PaymentProcessor {
         return planRepository.findByStripePriceId(price.getId())
                 .map(Plan::getId)
                 .orElse(null);
+    }
+
+    private String extractSubscriptionId(Invoice invoice) {
+        var parent = invoice.getParent();
+        if (parent == null) return null;
+
+        var subDetails = parent.getSubscriptionDetails();
+        if (subDetails == null) return null;
+
+        return subDetails.getSubscription();
     }
 
 }

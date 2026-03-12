@@ -29,4 +29,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     }
 
+    @Override
+    public void renewSubscriptionPeriod(String subId, Instant periodStart, Instant periodEnd) {
+
+    }
+
 }
