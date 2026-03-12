@@ -5,13 +5,17 @@ import com.nims_creation.projects.BuildSy.Dto.Subscription.CheckoutResponse;
 import com.nims_creation.projects.BuildSy.Dto.Subscription.PortalResponse;
 import com.nims_creation.projects.BuildSy.Entity.Plan;
 import com.nims_creation.projects.BuildSy.Entity.User;
+import com.nims_creation.projects.BuildSy.Error.BadRequestException;
 import com.nims_creation.projects.BuildSy.Error.ResourceNotFoundException;
 import com.nims_creation.projects.BuildSy.Repository.PlanRepository;
 import com.nims_creation.projects.BuildSy.Repository.UserRepository;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.PaymentProcessor;
+import com.nims_creation.projects.BuildSy.Service.SubscriptionService;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Invoice;
 import com.stripe.model.StripeObject;
+import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,9 +34,11 @@ public class StripePaymentProcessor implements PaymentProcessor {
     private final AuthUtil authUtil;
     private final PlanRepository planRepository;
     private final UserRepository userRepository;
+    private final SubscriptionService subscriptionService;
 
     @Value("${client.url}")
     private String frontendUrl;
+
     @Override
     public CheckoutResponse createCheckoutSessionUrl(CheckoutRequest request) {
         Plan plan = planRepository.findById(request.planId()).orElseThrow(() ->
@@ -47,7 +54,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setSubscriptionData(
                         new SessionCreateParams.SubscriptionData.Builder()
-                                .setBillingCycleAnchor(SessionCreateParams.SubscriptionData.BillingMode.builder()
+                                .setBillingMode(SessionCreateParams.SubscriptionData.BillingMode.builder()
                                         .setType(SessionCreateParams.SubscriptionData.BillingMode.Type.FLEXIBLE)
                                         .build())
                                 .build()
@@ -72,12 +79,69 @@ public class StripePaymentProcessor implements PaymentProcessor {
     }
 
     @Override
-    public PortalResponse openCustomerPortal(Long userId) {
-        return null;
+    public PortalResponse openCustomerPortal() {
+        Long userId = authUtil.getCurrentUserId();
+        User user = getUser(userId);
+        String stripeCustomerId = user.getStripeCustomerId();
+
+        if(stripeCustomerId == null || stripeCustomerId.isEmpty()) {
+            throw new BadRequestException("User does not have a Stripe Customer Id, UserId:"+userId);
+        }
+
+        try {
+            var portalSession = com.stripe.model.billingportal.Session.create(
+                    com.stripe.param.billingportal.SessionCreateParams.builder()
+                            .setCustomer(stripeCustomerId)
+                            .setReturnUrl(frontendUrl)
+                            .build()
+            );
+
+            return new PortalResponse(portalSession.getUrl());
+        } catch (StripeException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void handleWebhookEvent(String type, StripeObject stripeObject, Map<String, String> metadata) {
-        log.info("type");
+        log.debug("Handling stripe event: {}", type);
+
+        switch (type) {
+            case "checkout.session.completed" -> handleCheckoutSessionCompleted((Session) stripeObject, metadata); // one-time, on checkout completed
+            case "customer.subscription.updated" -> handleCustomerSubscriptionUpdated((Subscription) stripeObject); // when user cancels, upgrades or any updates
+            case "customer.subscription.deleted" -> handleCustomerSubscriptionDeleted((Subscription) stripeObject); // when subscription ends, revoke the access
+            case "invoice.paid" -> handleInvoicePaid((Invoice) stripeObject); // when invoice is paid
+            case "invoice.payment_failed" -> handleInvoicePaymentFailed((Invoice) stripeObject); // when invoice is not paid, mark as PAST_DUE
+            default -> log.debug("Ignoring the event: {}", type);
+        }
     }
+
+
+    private void handleCheckoutSessionCompleted(Session session, Map<String, String> metadata) {
+        if(session == null) {
+            log.error("session object was null");
+            return;
+        }
+
+        Long userId = Long.parseLong(metadata.get("user_id"));
+        Long planId = Long.parseLong(metadata.get("plan_id"));
+
+        String subscriptionId = session.getSubscription();
+        String customerId = session.getCustomer();
+
+        User user = getUser(userId);
+        if(user.getStripeCustomerId() == null) {
+            user.setStripeCustomerId(customerId);
+            userRepository.save(user);
+        }
+
+        subscriptionService.activateSubscription(userId, planId, subscriptionId, customerId);
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new ResourceNotFoundException("user", userId.toString()));
+    }
+
 }
+
