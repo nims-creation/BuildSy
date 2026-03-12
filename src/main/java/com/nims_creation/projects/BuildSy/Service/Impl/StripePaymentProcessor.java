@@ -3,6 +3,7 @@ package com.nims_creation.projects.BuildSy.Service.Impl;
 import com.nims_creation.projects.BuildSy.Dto.Subscription.CheckoutRequest;
 import com.nims_creation.projects.BuildSy.Dto.Subscription.CheckoutResponse;
 import com.nims_creation.projects.BuildSy.Dto.Subscription.PortalResponse;
+import com.nims_creation.projects.BuildSy.Entity.Enum.SubscriptionStatus;
 import com.nims_creation.projects.BuildSy.Entity.Plan;
 import com.nims_creation.projects.BuildSy.Entity.User;
 import com.nims_creation.projects.BuildSy.Error.BadRequestException;
@@ -13,9 +14,7 @@ import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.PaymentProcessor;
 import com.nims_creation.projects.BuildSy.Service.SubscriptionService;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Invoice;
-import com.stripe.model.StripeObject;
-import com.stripe.model.Subscription;
+import com.stripe.model.*;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Map;
 
 
@@ -138,10 +138,63 @@ public class StripePaymentProcessor implements PaymentProcessor {
         subscriptionService.activateSubscription(userId, planId, subscriptionId, customerId);
     }
 
+
+    private void handleCustomerSubscriptionUpdated(Subscription subscription) {
+        if (subscription == null) {
+            log.error("subscription object was null inside handleCustomerSubscriptionUpdated");
+            return;
+        }
+
+        SubscriptionStatus status = mapStripeStatusToEnum(subscription.getStatus());
+        if (status == null) {
+            log.warn("Unknown status '{}' for subscription {}", subscription.getStatus(), subscription.getId());
+            return;
+        }
+
+        SubscriptionItem item = subscription.getItems().getData().get(0);
+        Instant periodStart = toInstant(item.getCurrentPeriodStart());
+        Instant periodEnd = toInstant(item.getCurrentPeriodEnd());
+
+        Long planId = resolvePlanId(item.getPrice());
+
+        subscriptionService.updateSubscription(
+                subscription.getId(), status, periodStart, periodEnd,
+                subscription.getCancelAtPeriodEnd(), planId
+        );
+
+    }
+
+
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
                 new ResourceNotFoundException("user", userId.toString()));
     }
+
+    private SubscriptionStatus mapStripeStatusToEnum(String status) {
+        return switch (status) {
+            case "active" -> SubscriptionStatus.ACTIVE;
+            case "trialing" -> SubscriptionStatus.TRIALING;
+            case "past_due", "unpaid", "paused", "incomplete_expired" -> SubscriptionStatus.PAST_DUE;
+            case "canceled" -> SubscriptionStatus.CANCELED;
+            case "incomplete" -> SubscriptionStatus.INCOMPLETE;
+            default -> {
+                log.warn("Unmapped Stripe status: {}", status);
+                yield null;
+            }
+        };
+    }
+
+    private Instant toInstant(Long epoch) {
+        return epoch != null ? Instant.ofEpochSecond(epoch) : null;
+    }
+
+    private Long resolvePlanId(Price price) {
+        if (price == null || price.getId() == null) return null;
+        return planRepository.findByStripePriceId(price.getId())
+                .map(Plan::getId)
+                .orElse(null);
+    }
+
 
 }
 

@@ -1,8 +1,11 @@
 package com.nims_creation.projects.BuildSy.Service.Impl;
 
 import com.nims_creation.projects.BuildSy.Dto.Subscription.SubscriptionResponse;
+import com.nims_creation.projects.BuildSy.Entity.Enum.SubscriptionStatus;
 import com.nims_creation.projects.BuildSy.Service.SubscriptionService;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
 
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
@@ -13,6 +16,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void activateSubscription(Long userId, Long planId, String subscriptionId, String customerId) {
+
+    }
+
+    @Override
+    public void updateSubscription(String id, SubscriptionStatus status, Instant periodStart, Instant periodEnd, Boolean cancelAtPeriodEnd, Long planId) {
 
     }
 
