@@ -8,6 +8,7 @@ import com.nims_creation.projects.BuildSy.Entity.Project;
 import com.nims_creation.projects.BuildSy.Entity.ProjectMember;
 import com.nims_creation.projects.BuildSy.Entity.ProjectMemberId;
 import com.nims_creation.projects.BuildSy.Entity.User;
+import com.nims_creation.projects.BuildSy.Error.BadRequestException;
 import com.nims_creation.projects.BuildSy.Error.ResourceNotFoundException;
 import com.nims_creation.projects.BuildSy.Mapper.ProjectMapper;
 import com.nims_creation.projects.BuildSy.Repository.ProjectMemberRepository;
@@ -33,11 +34,17 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectMapper projectMapper;
     private final AuthUtil authUtil;
+    private final SubscriptionServiceImpl subscriptionService;
 
 
 
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
+
+        if(!subscriptionService.canCreateNewProject()){
+            throw new BadRequestException("user can not create a New project with current Plan, upgrade plan now.");
+        }
+
         Long userId = authUtil.getCurrentUserId();
 
         User owner = userRepository.getReferenceById(userId);
