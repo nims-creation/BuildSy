@@ -8,8 +8,10 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,8 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 "projectId", projectId
         );
 
+        StringBuilder fullResponseBuffer = new StringBuilder();
+
         return chatClient.prompt()
                 .system("SYSTEM_PROMPT_HERE")
                 .user(userMessage)
@@ -40,14 +44,21 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 .stream()
                 .chatResponse()
                 .doOnNext(response ->{
-
+                    String content = response.getResult().getOutput().getText();
+                    fullResponseBuffer.append(content);
                 })
                 .doOnComplete(()->{
-
+                    Schedulers.boundedElastic().schedule(()->{
+                        parseAndSaveFile(fullResponseBuffer.toString(), projectId);
+                    });
                 })
-                .doOnError(error -> log.error("Error during streaming for projectId:"))
-        return null;
+                .doOnError(error -> log.error("Error during streaming for projectId:{}",projectId))
+                .map(response-> Objects.requireNonNull(response.getResult().getOutput().getText()));
     }
+
+    private void parseAndSaveFile(String fullResponse, Long projectId) {
+    }
+
 
     private void createChatSessionIfNotExists(Long projectId, Long userId){
 
