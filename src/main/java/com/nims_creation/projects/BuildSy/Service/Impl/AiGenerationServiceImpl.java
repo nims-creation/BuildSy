@@ -1,7 +1,9 @@
 package com.nims_creation.projects.BuildSy.Service.Impl;
 
+import com.nims_creation.projects.BuildSy.LLM.PromptUtils;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.AiGenerationService;
+import com.nims_creation.projects.BuildSy.Service.ProjectFileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -12,6 +14,8 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +24,8 @@ public class AiGenerationServiceImpl implements AiGenerationService {
 
     private final ChatClient chatClient;
     private final AuthUtil authUtil;
+    private final ProjectFileService projectFileService;
+    private static final Pattern FILE_TAG_PATTERN = Pattern.compile("<file path=\"([^\"]+)\">(.*?)</file>", Pattern.DOTALL);
 
     @Override
     @PreAuthorize("@security.canEditProject(#projectId)")
@@ -35,7 +41,7 @@ public class AiGenerationServiceImpl implements AiGenerationService {
         StringBuilder fullResponseBuffer = new StringBuilder();
 
         return chatClient.prompt()
-                .system("SYSTEM_PROMPT_HERE")
+                .system(PromptUtils.CODE_GENERATION_SYSTEM_PROMPT)
                 .user(userMessage)
                 .advisors(advisorSpec -> {
                     advisorSpec.params(adviserParams);
@@ -57,6 +63,14 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     }
 
     private void parseAndSaveFile(String fullResponse, Long projectId) {
+
+        Matcher matcher = FILE_TAG_PATTERN.matcher(fullResponse);
+
+        while(matcher.find()){
+            String filePath = matcher.group(1);
+            String fileContent = matcher.group(2).trim();
+            projectFileService.saveFile(projectId, filePath, fileContent);
+        }
     }
 
 

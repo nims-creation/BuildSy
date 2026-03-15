@@ -2,7 +2,7 @@ package com.nims_creation.projects.BuildSy.Controller;
 
 import com.nims_creation.projects.BuildSy.Dto.Project.FileContentResponse;
 import com.nims_creation.projects.BuildSy.Dto.Project.FileNode;
-import com.nims_creation.projects.BuildSy.Service.FileService;
+import com.nims_creation.projects.BuildSy.Service.ProjectFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/projects/{projectId}/files")
 public class FileController {
 
-    private final FileService fileService;
+    private final ProjectFileService fileService;
 
     @GetMapping
     public ResponseEntity<List<FileNode>> getFileTree(@PathVariable Long projectId) {
