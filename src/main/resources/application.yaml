@@ -38,3 +38,8 @@ stripe:
 
 client:
   url: http://localhost:8080
+
+logging:
+  level:
+    org.springframework.ai:
+      chat.client: DEBUG
