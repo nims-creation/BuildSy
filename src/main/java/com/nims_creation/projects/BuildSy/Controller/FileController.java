@@ -31,7 +31,7 @@ public class FileController {
             @PathVariable String path
     ) {
         Long userId = 1L;
-        return ResponseEntity.ok(fileService.getFileContent(projectId, path, userId));
+        return ResponseEntity.ok(fileService.getFileContent(projectId, path));
     }
 
 }

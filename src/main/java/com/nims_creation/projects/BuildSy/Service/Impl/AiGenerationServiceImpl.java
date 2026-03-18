@@ -2,6 +2,7 @@ package com.nims_creation.projects.BuildSy.Service.Impl;
 
 import com.nims_creation.projects.BuildSy.LLM.Advisors.FileTreeContextAdvisor;
 import com.nims_creation.projects.BuildSy.LLM.PromptUtils;
+import com.nims_creation.projects.BuildSy.LLM.Tools.CodeGenerationTools;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.AiGenerationService;
 import com.nims_creation.projects.BuildSy.Service.ProjectFileService;
@@ -42,9 +43,12 @@ public class AiGenerationServiceImpl implements AiGenerationService {
 
         StringBuilder fullResponseBuffer = new StringBuilder();
 
+        CodeGenerationTools codeGenerationTools = new CodeGenerationTools(projectFileService,projectId);
+
         return chatClient.prompt()
                 .system(PromptUtils.CODE_GENERATION_SYSTEM_PROMPT)
                 .user(userMessage)
+                .tools(codeGenerationTools)
                 .advisors(advisorSpec -> {
                     advisorSpec.params(adviserParams);
                     advisorSpec.advisors(fileTreeContextAdvisor);
