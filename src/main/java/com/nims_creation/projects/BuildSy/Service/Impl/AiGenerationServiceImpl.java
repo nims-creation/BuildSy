@@ -1,5 +1,6 @@
 package com.nims_creation.projects.BuildSy.Service.Impl;
 
+import com.nims_creation.projects.BuildSy.LLM.Advisors.FileTreeContextAdvisor;
 import com.nims_creation.projects.BuildSy.LLM.PromptUtils;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.AiGenerationService;
@@ -25,6 +26,7 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     private final ChatClient chatClient;
     private final AuthUtil authUtil;
     private final ProjectFileService projectFileService;
+    private final FileTreeContextAdvisor fileTreeContextAdvisor;
     private static final Pattern FILE_TAG_PATTERN = Pattern.compile("<file path=\"([^\"]+)\">(.*?)</file>", Pattern.DOTALL);
 
     @Override
@@ -45,6 +47,7 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 .user(userMessage)
                 .advisors(advisorSpec -> {
                     advisorSpec.params(adviserParams);
+                    advisorSpec.advisors(fileTreeContextAdvisor);
                         }
                 )
                 .stream()

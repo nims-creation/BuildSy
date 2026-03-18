@@ -16,6 +16,7 @@ import com.nims_creation.projects.BuildSy.Repository.ProjectRepository;
 import com.nims_creation.projects.BuildSy.Repository.UserRepository;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.ProjectService;
+import com.nims_creation.projects.BuildSy.Service.ProjectTemplateService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +36,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper projectMapper;
     private final AuthUtil authUtil;
     private final SubscriptionServiceImpl subscriptionService;
+    private final ProjectTemplateService projectTemplateService;
 
 
 
@@ -67,6 +69,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .build();
 
         projectMemberRepository.save(projectMember);
+        projectTemplateService.initializeProjectFromTemplate(project.getId());
 
         return projectMapper.toProjectResponse(project);
     }
