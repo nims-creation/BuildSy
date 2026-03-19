@@ -30,7 +30,7 @@ public class CodeGenerationTools {
 
             log.info("Requested file: {}", cleanPath);
 
-            String content = projectFileService.getFileContent(projectId, cleanPath).content();
+            String content = projectFileService.getFileContent(projectId, cleanPath  ff).content();
 
             result.add(String.format(
                     "--- START OF FILE: %s ---\n%s\n--- END OF FILE ---",
