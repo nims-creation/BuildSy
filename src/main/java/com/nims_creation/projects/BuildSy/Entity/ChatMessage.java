@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.boot.jaxb.mapping.spi.db.JaxbColumnDefinable;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "chat_messages")
@@ -37,6 +38,8 @@ public class ChatMessage {
     @Column(nullable = false)
     MessageRole role;
 
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, fetch = FetchType.LAZY) @OrderBy("sequenceOrder ASC")
+    List<ChatEvent> events;
 
     String toolCalls; // JSON Array of Tools Called
     Integer tokensUsed = 0;
