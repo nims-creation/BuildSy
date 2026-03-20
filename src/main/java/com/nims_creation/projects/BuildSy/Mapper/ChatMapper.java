@@ -1,4 +1,4 @@
-package com.nims_creation.projects.BuildSy.Dto.Member;
+package com.nims_creation.projects.BuildSy.Mapper;
 
 import com.nims_creation.projects.BuildSy.Dto.Chat.ChatResponse;
 import com.nims_creation.projects.BuildSy.Entity.ChatMessage;

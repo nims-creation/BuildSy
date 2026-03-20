@@ -1,7 +1,7 @@
 package com.nims_creation.projects.BuildSy.Service.Impl;
 
 import com.nims_creation.projects.BuildSy.Dto.Chat.ChatResponse;
-import com.nims_creation.projects.BuildSy.Dto.Member.ChatMapper;
+import com.nims_creation.projects.BuildSy.Mapper.ChatMapper;
 import com.nims_creation.projects.BuildSy.Entity.ChatMessage;
 import com.nims_creation.projects.BuildSy.Entity.ChatSession;
 import com.nims_creation.projects.BuildSy.Entity.ChatSessionId;
