@@ -1,17 +1,14 @@
 package com.nims_creation.projects.BuildSy.Service.Impl;
 
-import com.nims_creation.projects.BuildSy.Entity.ChatSession;
-import com.nims_creation.projects.BuildSy.Entity.ChatSessionId;
-import com.nims_creation.projects.BuildSy.Entity.Project;
-import com.nims_creation.projects.BuildSy.Entity.User;
+import com.nims_creation.projects.BuildSy.Entity.*;
+import com.nims_creation.projects.BuildSy.Entity.Enum.ChatEventType;
+import com.nims_creation.projects.BuildSy.Entity.Enum.MessageRole;
 import com.nims_creation.projects.BuildSy.Error.ResourceNotFoundException;
 import com.nims_creation.projects.BuildSy.LLM.Advisors.FileTreeContextAdvisor;
 import com.nims_creation.projects.BuildSy.LLM.LlmResponseParser;
 import com.nims_creation.projects.BuildSy.LLM.PromptUtils;
 import com.nims_creation.projects.BuildSy.LLM.Tools.CodeGenerationTools;
-import com.nims_creation.projects.BuildSy.Repository.ChatSessionRepository;
-import com.nims_creation.projects.BuildSy.Repository.ProjectRepository;
-import com.nims_creation.projects.BuildSy.Repository.UserRepository;
+import com.nims_creation.projects.BuildSy.Repository.*;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.AiGenerationService;
 import com.nims_creation.projects.BuildSy.Service.ProjectFileService;
@@ -23,6 +20,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -41,13 +39,15 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     private final ChatSessionRepository chatSessionRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final ChatEventRepository chatEventRepository;
     private static final Pattern FILE_TAG_PATTERN = Pattern.compile("<file path=\"([^\"]+)\">(.*?)</file>", Pattern.DOTALL);
 
     @Override
     @PreAuthorize("@security.canEditProject(#projectId)")
     public Flux<String> streamResponse(String userMessage, Long projectId) {
         Long userId = authUtil.getCurrentUserId();
-        createChatSessionIfNotExists(projectId, userId);
+        ChatSession chatSession = createChatSessionIfNotExists(projectId, userId);
 
         Map<String, Object> adviserParams = Map.of(
                 "userid",userId,
@@ -75,7 +75,8 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 })
                 .doOnComplete(()->{
                     Schedulers.boundedElastic().schedule(()->{
-                        parseAndSaveFile(fullResponseBuffer.toString(), projectId);
+                        //parseAndSaveFile(fullResponseBuffer.toString(), projectId);
+                        finalizeChats(userMessage, chatSession, fullResponseBuffer.toString(), projectId);
                     });
                 })
                 .doOnError(error -> log.error("Error during streaming for projectId:{}",projectId))
@@ -83,20 +84,30 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     }
 
     private void finalizeChats(String userMessage, ChatSession chatSession, String fullText, Long projectId){
+        chatMessageRepository.save(
+                ChatMessage.builder()
+                        .chatSession(chatSession)
+                        .role(MessageRole.USER)
+                        .content(userMessage)
+                        .build()
+        );
 
+        ChatMessage assistantChatMessage = ChatMessage.builder()
+                .role(MessageRole.ASSISTANT)
+                .chatSession(chatSession)
+                .build();
 
+        assistantChatMessage = chatMessageRepository.save(assistantChatMessage);
+
+        List<ChatEvent> chatEventList = llmResponseParser.parseChatEvents(fullText, assistantChatMessage);
+
+        chatEventList.stream()
+                .filter(e -> e.getType() == ChatEventType.FILE_EDIT)
+                .forEach(e-> projectFileService.saveFile(projectId, e.getFilePath(), e.getContent()));
+
+        chatEventRepository.saveAll(chatEventList);
     }
 
-    private void parseAndSaveFile(String fullResponse, Long projectId) {
-
-        Matcher matcher = FILE_TAG_PATTERN.matcher(fullResponse);
-
-        while(matcher.find()){
-            String filePath = matcher.group(1);
-            String fileContent = matcher.group(2).trim();
-            projectFileService.saveFile(projectId, filePath, fileContent);
-        }
-    }
 
 
     private ChatSession createChatSessionIfNotExists(Long projectId, Long userId){
