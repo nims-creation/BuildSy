@@ -1,6 +1,6 @@
 package com.nims_creation.projects.BuildSy.Service;
 
-import org.springframework.ai.chat.model.ChatResponse;
+import com.nims_creation.projects.BuildSy.Dto.Chat.ChatResponse;
 
 import java.util.List;
 
