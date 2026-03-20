@@ -1,8 +1,17 @@
 package com.nims_creation.projects.BuildSy.Service.Impl;
 
+import com.nims_creation.projects.BuildSy.Entity.ChatSession;
+import com.nims_creation.projects.BuildSy.Entity.ChatSessionId;
+import com.nims_creation.projects.BuildSy.Entity.Project;
+import com.nims_creation.projects.BuildSy.Entity.User;
+import com.nims_creation.projects.BuildSy.Error.ResourceNotFoundException;
 import com.nims_creation.projects.BuildSy.LLM.Advisors.FileTreeContextAdvisor;
+import com.nims_creation.projects.BuildSy.LLM.LlmResponseParser;
 import com.nims_creation.projects.BuildSy.LLM.PromptUtils;
 import com.nims_creation.projects.BuildSy.LLM.Tools.CodeGenerationTools;
+import com.nims_creation.projects.BuildSy.Repository.ChatSessionRepository;
+import com.nims_creation.projects.BuildSy.Repository.ProjectRepository;
+import com.nims_creation.projects.BuildSy.Repository.UserRepository;
 import com.nims_creation.projects.BuildSy.Security.AuthUtil;
 import com.nims_creation.projects.BuildSy.Service.AiGenerationService;
 import com.nims_creation.projects.BuildSy.Service.ProjectFileService;
@@ -28,6 +37,10 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     private final AuthUtil authUtil;
     private final ProjectFileService projectFileService;
     private final FileTreeContextAdvisor fileTreeContextAdvisor;
+    private final LlmResponseParser llmResponseParser;
+    private final ChatSessionRepository chatSessionRepository;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
     private static final Pattern FILE_TAG_PATTERN = Pattern.compile("<file path=\"([^\"]+)\">(.*?)</file>", Pattern.DOTALL);
 
     @Override
@@ -69,6 +82,11 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 .map(response-> Objects.requireNonNull(response.getResult().getOutput().getText()));
     }
 
+    private void finalizeChats(String userMessage, ChatSession chatSession, String fullText, Long projectId){
+
+
+    }
+
     private void parseAndSaveFile(String fullResponse, Long projectId) {
 
         Matcher matcher = FILE_TAG_PATTERN.matcher(fullResponse);
@@ -81,7 +99,28 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     }
 
 
-    private void createChatSessionIfNotExists(Long projectId, Long userId){
+    private ChatSession createChatSessionIfNotExists(Long projectId, Long userId){
 
+        ChatSessionId chatSessionId = new ChatSessionId(projectId, userId);
+        ChatSession chatSession = chatSessionRepository.findById(chatSessionId).orElse(null);
+
+        if(chatSession == null){
+            Project project = projectRepository.findById(projectId)
+                    .orElseThrow(()-> new ResourceNotFoundException("Project",projectId.toString()));
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(()-> new ResourceNotFoundException("User",userId.toString()));
+
+            chatSession = ChatSession.builder()
+                    .id(chatSessionId)
+                    .project(project)
+                    .user(user)
+                    .build();
+
+
+            chatSession = chatSessionRepository.save(chatSession);
+        }
+
+        return chatSession;
     }
 }

@@ -1,9 +1,7 @@
 package com.nims_creation.projects.BuildSy.Entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,13 +9,17 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 
 @Entity
+@Table(name = "chat_sessions")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatSession {
 
     @EmbeddedId
-    private ChatSessionId chatSessionId;
+    private ChatSessionId id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("projectId")
