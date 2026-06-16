@@ -80,3 +80,88 @@ BuildSy/
 ├── services.docker-compose.yml   # PostgreSQL + MinIO containers
 └── pom.xml
 ```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Java 21+
+- Maven 3.8+
+- Docker & Docker Compose
+- OpenRouter API Key (or OpenAI key)
+- Stripe account (for billing features)
+
+### 1. Start Infrastructure Services
+
+```bash
+docker-compose -f services.docker-compose.yml up -d
+```
+
+This spins up:
+- **PostgreSQL** (pgvector) on port `9010`
+- **MinIO** (Object Storage) on port `9000` (API) and `9001` (Console)
+
+### 2. Configure Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+OPENAI_API_KEY=your_openrouter_or_openai_key
+JWT_SECRET_KEY=your_jwt_secret_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+```
+
+### 3. Run the Application
+
+```bash
+./mvnw spring-boot:run
+```
+
+Or on Windows:
+
+```bash
+mvnw.cmd spring-boot:run
+```
+
+The server starts on `http://localhost:8080`.
+
+---
+
+## 🗺️ API Endpoints (Overview)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/auth/signup` | Register new user |
+| POST | `/auth/login` | Login and get JWT |
+| GET | `/auth/profile` | Get current user profile |
+| GET/POST | `/projects` | List / Create projects |
+| GET/DELETE | `/projects/{id}` | Get / Delete project |
+| POST | `/projects/{id}/chat` | Send AI chat message |
+| GET | `/projects/{id}/files` | Browse file tree |
+| GET/PUT | `/projects/{id}/files/{path}` | Read / Write file |
+| POST | `/projects/{id}/members` | Invite member |
+| GET | `/billing/plans` | List subscription plans |
+| POST | `/billing/checkout` | Start Stripe checkout |
+| POST | `/billing/portal` | Open billing portal |
+| GET | `/usage/today` | Get today's usage |
+
+---
+
+## 🐳 Docker Services
+
+```yaml
+# services.docker-compose.yml
+
+PostgreSQL (pgvector):
+  Port: 9010 → 5432
+  DB: pgvector-test
+  User: user / password
+
+MinIO:
+  API Port: 9000
+  Console Port: 9001
+  Credentials: minioadmin / minioadmin123
+```
