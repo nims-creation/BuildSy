@@ -130,6 +130,36 @@ The server starts on `http://localhost:8080`.
 
 ---
 
+## 🔑 Key Features (Backend)
+
+### 🤖 AI Code Generation
+- Integrates with OpenRouter (GPT-4o-mini) via Spring AI
+- Custom `FileTreeContextAdvisor` injects project file structure as context
+- `CodeGenerationTools` let the LLM directly read/write project files
+- Streaming chat responses via `ChatEventResponse`
+
+### 🔐 Authentication & Security
+- JWT-based stateless authentication
+- Custom `JwtAuthFilter` and `JwtUserPrincipal`
+- Method-level security with `SecurityExpression` and `ProjectPermission` roles
+
+### 👥 Project Collaboration
+- Role-based access: `ProjectRole` (OWNER, EDITOR, VIEWER, etc.)
+- Invite members by email
+- Per-member permission enforcement
+
+### 💳 Billing & Subscriptions
+- Stripe Checkout + Customer Portal integration
+- Plan-based limits with daily usage tracking via `UsageLog`
+- `UsageController` exposes current usage stats
+
+### 🗄️ File Storage
+- Project files stored in MinIO (`projects` bucket)
+- File tree browsing (`FileNode` structure)
+- File content read/write via `FileController`
+
+---
+
 ## 🗺️ API Endpoints (Overview)
 
 | Method | Endpoint | Description |
@@ -165,3 +195,42 @@ MinIO:
   Console Port: 9001
   Credentials: minioadmin / minioadmin123
 ```
+
+---
+
+## 📋 Development Status
+
+> ⚠️ **This project is actively under development.** Features are being added daily.
+
+### ✅ Completed
+- [x] User Authentication (JWT)
+- [x] Project CRUD
+- [x] AI Chat Integration (Spring AI + OpenRouter)
+- [x] File Storage (MinIO)
+- [x] Project File Management
+- [x] Team Member Collaboration
+- [x] Stripe Billing & Subscriptions
+- [x] Usage Tracking
+- [x] Role-Based Access Control
+- [x] LLM Tool Calling (CodeGenerationTools)
+- [x] File Tree Context for AI
+
+### 🔄 In Progress
+- [ ] Frontend (React/Next.js client)
+- [ ] Live Code Preview
+- [ ] WebSocket support for real-time collaboration
+- [ ] Git integration
+
+---
+
+## 👨‍💻 Author
+
+**Nims Creation**
+- Built independently from scratch
+- Started: 2026
+
+---
+
+## 📄 License
+
+See [LICENSE](LICENSE) file for details.
